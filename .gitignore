@@ -1,0 +1,4 @@
+tests/
+.vscode/
+workspace.code*
+*.o
