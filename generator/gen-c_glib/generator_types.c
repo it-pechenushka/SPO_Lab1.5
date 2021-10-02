@@ -1079,8 +1079,7 @@ request_get_type (void)
 enum _TestPingArgsProperties
 {
   PROP_TEST_PING_ARGS_0,
-  PROP_TEST_PING_ARGS_REQUEST,
-  PROP_TEST_PING_ARGS_RESPONSE
+  PROP_TEST_PING_ARGS_REQUEST
 };
 
 /* reads a test_ping_args object */
@@ -1147,21 +1146,6 @@ test_ping_args_read (ThriftStruct *object, ThriftProtocol *protocol, GError **er
           xfer += ret;
         }
         break;
-      case 2:
-        if (ftype == T_STRUCT)
-        {
-          if ((ret = thrift_struct_read (THRIFT_STRUCT (this_object->response), protocol, error)) < 0)
-          {
-            return -1;
-          }
-          xfer += ret;
-          this_object->__isset_response = TRUE;
-        } else {
-          if ((ret = thrift_protocol_skip (protocol, ftype, error)) < 0)
-            return -1;
-          xfer += ret;
-        }
-        break;
       default:
         if ((ret = thrift_protocol_skip (protocol, ftype, error)) < 0)
           return -1;
@@ -1201,16 +1185,6 @@ test_ping_args_write (ThriftStruct *object, ThriftProtocol *protocol, GError **e
   if ((ret = thrift_protocol_write_field_end (protocol, error)) < 0)
     return -1;
   xfer += ret;
-  if ((ret = thrift_protocol_write_field_begin (protocol, "response", T_STRUCT, 2, error)) < 0)
-    return -1;
-  xfer += ret;
-  if ((ret = thrift_struct_write (THRIFT_STRUCT (this_object->response), protocol, error)) < 0)
-    return -1;
-  xfer += ret;
-
-  if ((ret = thrift_protocol_write_field_end (protocol, error)) < 0)
-    return -1;
-  xfer += ret;
   if ((ret = thrift_protocol_write_field_stop (protocol, error)) < 0)
     return -1;
   xfer += ret;
@@ -1238,13 +1212,6 @@ test_ping_args_set_property (GObject *object,
       self->__isset_request = TRUE;
       break;
 
-    case PROP_TEST_PING_ARGS_RESPONSE:
-      if (self->response != NULL)
-        g_object_unref (self->response);
-      self->response = g_value_dup_object (value);
-      self->__isset_response = TRUE;
-      break;
-
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
@@ -1265,10 +1232,6 @@ test_ping_args_get_property (GObject *object,
       g_value_set_object (value, self->request);
       break;
 
-    case PROP_TEST_PING_ARGS_RESPONSE:
-      g_value_set_object (value, self->response);
-      break;
-
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
@@ -1282,8 +1245,6 @@ test_ping_args_instance_init (TestPingArgs * object)
   THRIFT_UNUSED_VAR (object);
   object->request = g_object_new (TYPE_REQUEST, NULL);
   object->__isset_request = FALSE;
-  object->response = g_object_new (TYPE_RESPONSE, NULL);
-  object->__isset_response = FALSE;
 }
 
 static void 
@@ -1297,11 +1258,6 @@ test_ping_args_finalize (GObject *object)
   {
     g_object_unref(tobject->request);
     tobject->request = NULL;
-  }
-  if (tobject->response != NULL)
-  {
-    g_object_unref(tobject->response);
-    tobject->response = NULL;
   }
 }
 
@@ -1325,15 +1281,6 @@ test_ping_args_class_init (TestPingArgsClass * cls)
                          NULL,
                          NULL,
                          TYPE_REQUEST,
-                         G_PARAM_READWRITE));
-
-  g_object_class_install_property
-    (gobject_class,
-     PROP_TEST_PING_ARGS_RESPONSE,
-     g_param_spec_object ("response",
-                         NULL,
-                         NULL,
-                         TYPE_RESPONSE,
                          G_PARAM_READWRITE));
 }
 
@@ -1365,6 +1312,12 @@ test_ping_args_get_type (void)
 
   return type;
 }
+
+enum _TestPingResultProperties
+{
+  PROP_TEST_PING_RESULT_0,
+  PROP_TEST_PING_RESULT_SUCCESS
+};
 
 /* reads a test_ping_result object */
 static gint32
@@ -1415,6 +1368,21 @@ test_ping_result_read (ThriftStruct *object, ThriftProtocol *protocol, GError **
 
     switch (fid)
     {
+      case 0:
+        if (ftype == T_STRUCT)
+        {
+          if ((ret = thrift_struct_read (THRIFT_STRUCT (this_object->success), protocol, error)) < 0)
+          {
+            return -1;
+          }
+          xfer += ret;
+          this_object->__isset_success = TRUE;
+        } else {
+          if ((ret = thrift_protocol_skip (protocol, ftype, error)) < 0)
+            return -1;
+          xfer += ret;
+        }
+        break;
       default:
         if ((ret = thrift_protocol_skip (protocol, ftype, error)) < 0)
           return -1;
@@ -1444,6 +1412,18 @@ test_ping_result_write (ThriftStruct *object, ThriftProtocol *protocol, GError *
   if ((ret = thrift_protocol_write_struct_begin (protocol, "TestPingResult", error)) < 0)
     return -1;
   xfer += ret;
+  if (this_object->__isset_success == TRUE) {
+    if ((ret = thrift_protocol_write_field_begin (protocol, "success", T_STRUCT, 0, error)) < 0)
+      return -1;
+    xfer += ret;
+    if ((ret = thrift_struct_write (THRIFT_STRUCT (this_object->success), protocol, error)) < 0)
+      return -1;
+    xfer += ret;
+
+    if ((ret = thrift_protocol_write_field_end (protocol, error)) < 0)
+      return -1;
+    xfer += ret;
+  }
   if ((ret = thrift_protocol_write_field_stop (protocol, error)) < 0)
     return -1;
   xfer += ret;
@@ -1454,11 +1434,56 @@ test_ping_result_write (ThriftStruct *object, ThriftProtocol *protocol, GError *
   return xfer;
 }
 
+static void
+test_ping_result_set_property (GObject *object,
+                               guint property_id,
+                               const GValue *value,
+                               GParamSpec *pspec)
+{
+  TestPingResult *self = TEST_PING_RESULT (object);
+
+  switch (property_id)
+  {
+    case PROP_TEST_PING_RESULT_SUCCESS:
+      if (self->success != NULL)
+        g_object_unref (self->success);
+      self->success = g_value_dup_object (value);
+      self->__isset_success = TRUE;
+      break;
+
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+      break;
+  }
+}
+
+static void
+test_ping_result_get_property (GObject *object,
+                               guint property_id,
+                               GValue *value,
+                               GParamSpec *pspec)
+{
+  TestPingResult *self = TEST_PING_RESULT (object);
+
+  switch (property_id)
+  {
+    case PROP_TEST_PING_RESULT_SUCCESS:
+      g_value_set_object (value, self->success);
+      break;
+
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+      break;
+  }
+}
+
 static void 
 test_ping_result_instance_init (TestPingResult * object)
 {
   /* satisfy -Wall */
   THRIFT_UNUSED_VAR (object);
+  object->success = g_object_new (TYPE_RESPONSE, NULL);
+  object->__isset_success = FALSE;
 }
 
 static void 
@@ -1468,6 +1493,11 @@ test_ping_result_finalize (GObject *object)
 
   /* satisfy -Wall in case we don't use tobject */
   THRIFT_UNUSED_VAR (tobject);
+  if (tobject->success != NULL)
+  {
+    g_object_unref(tobject->success);
+    tobject->success = NULL;
+  }
 }
 
 static void
@@ -1480,6 +1510,17 @@ test_ping_result_class_init (TestPingResultClass * cls)
   struct_class->write = test_ping_result_write;
 
   gobject_class->finalize = test_ping_result_finalize;
+  gobject_class->get_property = test_ping_result_get_property;
+  gobject_class->set_property = test_ping_result_set_property;
+
+  g_object_class_install_property
+    (gobject_class,
+     PROP_TEST_PING_RESULT_SUCCESS,
+     g_param_spec_object ("success",
+                         NULL,
+                         NULL,
+                         TYPE_RESPONSE,
+                         G_PARAM_READWRITE));
 }
 
 GType

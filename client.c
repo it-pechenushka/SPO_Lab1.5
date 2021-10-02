@@ -8,6 +8,7 @@
 
 #include "generator/gen-c_glib/test.h"
 #include "generator/gen-c_glib/generator_types.h"
+#include "parser/request_parser.h"
 
 void input_command(char *, size_t *len);
 void input_command(char *, size_t *len);
@@ -51,9 +52,6 @@ int main (void)
                          "output_protocol", protocol,
                           NULL);
 
-  Node *node = g_object_new (TYPE_NODE, NULL);
-  Response *response = g_object_new(TYPE_RESPONSE, NULL);
-  
   //g_ptr_array_add(node->labels, "test");
   //g_hash_table_insert(node->props, "key1", node_prop);
 
@@ -62,12 +60,16 @@ int main (void)
 
   while (1)
   {
-    // input_command(input, size);
+    Response *response = g_object_new(TYPE_RESPONSE, NULL);
+    Request *request = g_object_new(TYPE_REQUEST, NULL);
+    //input_command(input, size);
+    
+    int status = parse_request(request, "CREATE (n:Person)");
+    if (test_if_ping (client, &response, request, &error)) {
+      printf("Success");
+    } 
 
-    // parse_comma
-    // if (test_if_ping (client, node, response, &error)) {
-    //   printf("Success");
-    // }    
+    getchar();
   }
 
 
@@ -83,6 +85,6 @@ int main (void)
 
 void input_command(char *input, size_t *len)
 {
-    printf("Input command:\n");
+    printf("Input:\n");
     getline(&input, len, stdin);
 }

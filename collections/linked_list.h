@@ -4,11 +4,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct _Node {
-    struct _Node *prev;
+typedef struct _Node_L {
+    struct _Node_L *prev;
     void *value;
-    struct _Node *next;
-} Node;
+    struct _Node_L *next;
+} Node_L;
 
 typedef struct _Property {
     char key[20];
@@ -16,8 +16,8 @@ typedef struct _Property {
 } Property;
 
 typedef struct _LinkedList {
-    Node *first;
-    Node *last;
+    Node_L *first;
+    Node_L *last;
     uint32_t size;
 
     void (*free_value_fun)(void *value);

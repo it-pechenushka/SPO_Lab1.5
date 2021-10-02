@@ -5,7 +5,7 @@
 #include <malloc.h>
 
 uint32_t add_first(LinkedList *ptr, void *element) {
-    Node *created = malloc(sizeof(Node));
+    Node_L *created = malloc(sizeof(Node_L));
     created->next = ptr->first;
     created->value = element;
     ptr->first->prev = created;
@@ -14,8 +14,8 @@ uint32_t add_first(LinkedList *ptr, void *element) {
 }
 
 uint32_t add_last(LinkedList *ptr, void *element) {
-    Node *created = malloc(sizeof(Node));
-    bzero(created, sizeof(Node));
+    Node_L *created = malloc(sizeof(Node_L));
+    bzero(created, sizeof(Node_L));
     created->prev = ptr->last;
     created->value = element;
     if (ptr->last == NULL) {
@@ -37,7 +37,7 @@ LinkedList *init_list() {
 }
 
 void free_list(LinkedList *ptr, bool is_malloc_value) {
-    Node *current = ptr->first;
+    Node_L *current = ptr->first;
     if (ptr->size != 0) {
         for (uint64_t i = 1; i < ptr->size; ++i) {
             current = current->next;
@@ -52,13 +52,13 @@ void free_list(LinkedList *ptr, bool is_malloc_value) {
 
 void remove_first(LinkedList *list) {
     list->size--;
-    Node *next_first = list->first->next;
+    Node_L *next_first = list->first->next;
     free(list->first);
     list->first = next_first;
 }
 
 void remove_element(bool (*by)(void *, char *, char *), LinkedList *ptr, char *first_to_find, char *second_to_find) {
-    Node *current = ptr->first;
+    Node_L *current = ptr->first;
     while (current != NULL && !by(current->value, first_to_find, second_to_find)) {
         current = current->next;
     }
@@ -84,7 +84,7 @@ void *find_element(bool (*by)(void *, char *, char *), LinkedList *ptr, char *fi
     if (ptr->size == 0) {
         return NULL;
     }
-    Node *current = ptr->first;
+    Node_L *current = ptr->first;
     while (current != NULL && !by(current->value, first_to_find, second_to_find)) {
         current = current->next;
     }
@@ -98,7 +98,7 @@ bool by_value(void *value, char *to_find, char *second_argument) {
 
 uint16_t get_last_n(LinkedList *ptr, void **buffer, uint16_t buffer_size, bool(*filter)(void *, char *to_filter),
                     char *to_filter) {
-    Node *current = ptr->last;
+    Node_L *current = ptr->last;
     for (uint16_t i = 0; i < buffer_size; ++i) {
         if (current == NULL) return i;
         if (filter == NULL || filter(current->value, to_filter)) {

@@ -18,7 +18,7 @@ struct _TestIfInterface
 {
   GTypeInterface parent;
 
-  gboolean (*ping) (TestIf *iface, const Request * request, const Response * response, GError **error);
+  gboolean (*ping) (TestIf *iface, Response ** _return, const Request * request, GError **error);
 };
 typedef struct _TestIfInterface TestIfInterface;
 
@@ -28,7 +28,7 @@ GType test_if_get_type (void);
 #define IS_TEST_IF(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_TEST_IF))
 #define TEST_IF_GET_INTERFACE(inst) (G_TYPE_INSTANCE_GET_INTERFACE ((inst), TYPE_TEST_IF, TestIfInterface))
 
-gboolean test_if_ping (TestIf *iface, const Request * request, const Response * response, GError **error);
+gboolean test_if_ping (TestIf *iface, Response ** _return, const Request * request, GError **error);
 
 /* Test service client */
 struct _TestClient
@@ -54,9 +54,9 @@ GType test_client_get_type (void);
 #define TEST_IS_CLIENT_CLASS(c) (G_TYPE_CHECK_CLASS_TYPE ((c), TYPE_TEST_CLIENT))
 #define TEST_CLIENT_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_TEST_CLIENT, TestClientClass))
 
-gboolean test_client_ping (TestIf * iface, const Request * request, const Response * response, GError ** error);
-gboolean test_client_send_ping (TestIf * iface, const Request * request, const Response * response, GError ** error);
-gboolean test_client_recv_ping (TestIf * iface, GError ** error);
+gboolean test_client_ping (TestIf * iface, Response ** _return, const Request * request, GError ** error);
+gboolean test_client_send_ping (TestIf * iface, const Request * request, GError ** error);
+gboolean test_client_recv_ping (TestIf * iface, Response ** _return, GError ** error);
 void test_client_set_property (GObject *object, guint property_id, const GValue *value, GParamSpec *pspec);
 void test_client_get_property (GObject *object, guint property_id, GValue *value, GParamSpec *pspec);
 
@@ -71,7 +71,7 @@ struct _TestHandlerClass
 {
   GObjectClass parent;
 
-  gboolean (*ping) (TestIf *iface, const Request * request, const Response * response, GError **error);
+  gboolean (*ping) (TestIf *iface, Response ** _return, const Request * request, GError **error);
 };
 typedef struct _TestHandlerClass TestHandlerClass;
 
@@ -83,7 +83,7 @@ GType test_handler_get_type (void);
 #define IS_TEST_HANDLER_CLASS(c) (G_TYPE_CHECK_CLASS_TYPE ((c), TYPE_TEST_HANDLER))
 #define TEST_HANDLER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_TEST_HANDLER, TestHandlerClass))
 
-gboolean test_handler_ping (TestIf *iface, const Request * request, const Response * response, GError **error);
+gboolean test_handler_ping (TestIf *iface, Response ** _return, const Request * request, GError **error);
 
 /* Test processor */
 struct _TestProcessor

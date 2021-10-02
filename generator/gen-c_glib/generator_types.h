@@ -108,8 +108,6 @@ struct _TestPingArgs
   /* public */
   Request * request;
   gboolean __isset_request;
-  Response * response;
-  gboolean __isset_response;
 };
 typedef struct _TestPingArgs TestPingArgs;
 
@@ -133,6 +131,8 @@ struct _TestPingResult
   ThriftStruct parent; 
 
   /* public */
+  Response * success;
+  gboolean __isset_success;
 };
 typedef struct _TestPingResult TestPingResult;
 

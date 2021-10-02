@@ -10,9 +10,9 @@
 #include "test.h"
 
 gboolean
-test_if_ping (TestIf *iface, const Request * request, const Response * response, GError **error)
+test_if_ping (TestIf *iface, Response ** _return, const Request * request, GError **error)
 {
-  return TEST_IF_GET_INTERFACE (iface)->ping (iface, request, response, error);
+  return TEST_IF_GET_INTERFACE (iface)->ping (iface, _return, request, error);
 }
 
 GType
@@ -92,7 +92,7 @@ test_client_get_property (GObject *object, guint property_id, GValue *value, GPa
   }
 }
 
-gboolean test_client_send_ping (TestIf * iface, const Request * request, const Response * response, GError ** error)
+gboolean test_client_send_ping (TestIf * iface, const Request * request, GError ** error)
 {
   gint32 cseqid = 0;
   ThriftProtocol * protocol = TEST_CLIENT (iface)->output_protocol;
@@ -118,16 +118,6 @@ gboolean test_client_send_ping (TestIf * iface, const Request * request, const R
     if ((ret = thrift_protocol_write_field_end (protocol, error)) < 0)
       return 0;
     xfer += ret;
-    if ((ret = thrift_protocol_write_field_begin (protocol, "response", T_STRUCT, 2, error)) < 0)
-      return 0;
-    xfer += ret;
-    if ((ret = thrift_struct_write (THRIFT_STRUCT (response), protocol, error)) < 0)
-      return 0;
-    xfer += ret;
-
-    if ((ret = thrift_protocol_write_field_end (protocol, error)) < 0)
-      return 0;
-    xfer += ret;
     if ((ret = thrift_protocol_write_field_stop (protocol, error)) < 0)
       return 0;
     xfer += ret;
@@ -147,7 +137,7 @@ gboolean test_client_send_ping (TestIf * iface, const Request * request, const R
   return TRUE;
 }
 
-gboolean test_client_recv_ping (TestIf * iface, GError ** error)
+gboolean test_client_recv_ping (TestIf * iface, Response ** _return, GError ** error)
 {
   gint32 rseqid;
   gchar * fname = NULL;
@@ -231,6 +221,20 @@ gboolean test_client_recv_ping (TestIf * iface, GError ** error)
 
       switch (fid)
       {
+        case 0:
+          if (ftype == T_STRUCT)
+          {
+            if ((ret = thrift_struct_read (THRIFT_STRUCT (*_return), protocol, error)) < 0)
+            {
+              return 0;
+            }
+            xfer += ret;
+          } else {
+            if ((ret = thrift_protocol_skip (protocol, ftype, error)) < 0)
+              return 0;
+            xfer += ret;
+          }
+          break;
         default:
           if ((ret = thrift_protocol_skip (protocol, ftype, error)) < 0)
             return 0;
@@ -257,11 +261,11 @@ gboolean test_client_recv_ping (TestIf * iface, GError ** error)
   return TRUE;
 }
 
-gboolean test_client_ping (TestIf * iface, const Request * request, const Response * response, GError ** error)
+gboolean test_client_ping (TestIf * iface, Response ** _return, const Request * request, GError ** error)
 {
-  if (!test_client_send_ping (iface, request, response, error))
+  if (!test_client_send_ping (iface, request, error))
     return FALSE;
-  if (!test_client_recv_ping (iface, error))
+  if (!test_client_recv_ping (iface, _return, error))
     return FALSE;
   return TRUE;
 }
@@ -314,11 +318,11 @@ G_DEFINE_TYPE_WITH_CODE (TestHandler,
                          G_IMPLEMENT_INTERFACE (TYPE_TEST_IF,
                                                 test_handler_test_if_interface_init))
 
-gboolean test_handler_ping (TestIf * iface, const Request * request, const Response * response, GError ** error)
+gboolean test_handler_ping (TestIf * iface, Response ** _return, const Request * request, GError ** error)
 {
   g_return_val_if_fail (IS_TEST_HANDLER (iface), FALSE);
 
-  return TEST_HANDLER_GET_CLASS (iface)->ping (iface, request, response, error);
+  return TEST_HANDLER_GET_CLASS (iface)->ping (iface, _return, request, error);
 }
 
 static void
@@ -396,24 +400,28 @@ test_processor_process_ping (TestProcessor *self,
       (thrift_transport_read_end (transport, error) != FALSE))
   {
     Request * request;
-    Response * response;
+    Response * return_value;
     TestPingResult * result_struct;
 
     g_object_get (args,
                   "request", &request,
-                  "response", &response,
                   NULL);
 
     g_object_unref (transport);
     g_object_get (output_protocol, "transport", &transport, NULL);
 
     result_struct = g_object_new (TYPE_TEST_PING_RESULT, NULL);
+    g_object_get (result_struct, "success", &return_value, NULL);
 
     if (test_handler_ping (TEST_IF (self->handler),
+                           &return_value,
                            request,
-                           response,
                            error) == TRUE)
     {
+      g_object_set (result_struct, "success", return_value, NULL);
+      if (return_value != NULL)
+        g_object_unref (return_value);
+
       result =
         ((thrift_protocol_write_message_begin (output_protocol,
                                                "ping",
@@ -453,8 +461,6 @@ test_processor_process_ping (TestProcessor *self,
 
     if (request != NULL)
       g_object_unref (request);
-    if (response != NULL)
-      g_object_unref (response);
     g_object_unref (result_struct);
 
     if (result == TRUE)

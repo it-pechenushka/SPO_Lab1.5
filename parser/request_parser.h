@@ -1,8 +1,9 @@
-#ifndef _COMMAND_PARSER_H_
-#define _COMMAND_PARSER_H_
+#ifndef _REQUEST_PARSER_H_
+#define _REQUEST_PARSER_H_
 
 #include "../collections/linked_list.h"
 #include <cypher-parser.h>
+#include "../generator/gen-c_glib/generator_types.h"
 
 typedef enum _CommandType
 {
@@ -36,7 +37,7 @@ typedef struct _QueryInfo {
     int limit;
 } QueryInfo;
 
-    QueryInfo *parse_request(char *);
+    int parse_request(Request *, char *);
     QueryInfo *get_query_info(cypher_parse_result_t *);
 
 #endif

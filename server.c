@@ -1,5 +1,4 @@
-#include <glib-2.0/glib-object.h>
-#include <glib-2.0/gobject/gobject.h>
+#include <glib-object.h>
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
@@ -14,6 +13,9 @@
 #include <thrift/c_glib/transport/thrift_server_transport.h>
 
 #include "generator/gen-c_glib/test.h"
+#include "store/graph_struct.h"
+#include "collections/node_list.h"
+#include "handler/request_handler.h"
 
 //M_TEST
 #define TYPE_M_TEST_HANDLER \
@@ -55,21 +57,26 @@ G_DEFINE_TYPE (MTestHandler,
         m_test_handler,
         TYPE_TEST_HANDLER)
 
+NodeList *node_list;
+//function foreach
 
+
+///////////////////////////////////////////////////////////
 static gboolean
-m_test_handler_ping (TestIf  *iface, const Request * request, const Response * response, GError **error)
+m_test_handler_ping (TestIf  *iface, Response ** response, const Request * request, GError **error)
 {
-
+  
   THRIFT_UNUSED_VAR (iface);
   THRIFT_UNUSED_VAR (error);
-
+  build_data(node_list, request, *response);
+  printf("%s", (*response)->text);
   
-  printf("Bask Soon");
-
-
+  //g_hash_table_foreach(request->node->props, hash_table_foreach_action, NULL);
+  //g_ptr_array_foreach(request->node->labels, list_foreach_action, NULL);
+  printf("recive\n");
   return TRUE;
 }
-
+////////////////////////////////////////////////////////////
 static void
 m_test_handler_init (MTestHandler *self)
 {
@@ -152,6 +159,8 @@ int main()
   sigint_action.sa_flags = SA_RESETHAND;
   sigaction (SIGINT, &sigint_action, NULL);
 
+  node_list = init_store();
+
   puts ("Starting the server...");
   thrift_server_serve (server, &error);
 
@@ -173,3 +182,5 @@ int main()
 
   return exit_status;
 }
+
+

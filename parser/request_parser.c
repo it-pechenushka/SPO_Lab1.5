@@ -1,5 +1,7 @@
 #include <cypher-parser.h>
-#include "command_parser.h"
+#include <glib-object.h>
+#include "request_parser.h"
+#include "../generator/gen-c_glib/generator_types.h"
 
 /*
 Command code
@@ -38,9 +40,10 @@ void set_changed_labels_and_props(const cypher_astnode_t *clause, QueryInfo *inf
         const cypher_astnode_t *item = cypher_ast_set_get_item(clause, 0);
         if (cypher_astnode_type(item) == CYPHER_AST_SET_LABELS) {
             info->changed_labels = init_list();
+            //printf("%u\n", cypher_ast_set_labels_nlabels(item));
             for (int i = 0; i < cypher_ast_set_labels_nlabels(item); ++i) {
                 const cypher_astnode_t *set_label = cypher_ast_set_labels_get_label(item, i);
-                add_last(info->labels, (void *) cypher_ast_label_get_name(set_label));
+                add_last(info->changed_labels, (void *) cypher_ast_label_get_name(set_label));
                 //printf("Label: %s\n", (char *) info->labels->first->value);
             }
         }
@@ -50,7 +53,7 @@ void set_changed_labels_and_props(const cypher_astnode_t *clause, QueryInfo *inf
             const cypher_astnode_t *set_prop = cypher_ast_set_property_get_property(item);
             const cypher_astnode_t *prop_name = cypher_ast_property_operator_get_prop_name(set_prop);
             const cypher_astnode_t *expression = cypher_ast_set_property_get_expression(item);
-            
+
             Property *prop = malloc(sizeof(Property));
             if (
                     strlen(cypher_ast_prop_name_get_value(prop_name)) >
@@ -62,7 +65,7 @@ void set_changed_labels_and_props(const cypher_astnode_t *clause, QueryInfo *inf
             } else {
                 strcpy(prop->key, cypher_ast_prop_name_get_value(prop_name));
                 strcpy(prop->value, cypher_ast_string_get_value(expression));
-                add_last(info->props, prop);
+                add_last(info->changed_props, prop);
                 // printf("Property key: %s\n", prop->key);
                 // printf("Property value: %s\n", prop->value);
 
@@ -76,7 +79,7 @@ void set_changed_labels_and_props(const cypher_astnode_t *clause, QueryInfo *inf
             info->changed_labels = init_list();
             for (int i = 0; i < cypher_ast_remove_labels_nlabels(item); ++i) {
                 const cypher_astnode_t *set_label = cypher_ast_remove_labels_get_label(item, i);
-                add_last(info->labels, (void *) cypher_ast_label_get_name(set_label));
+                add_last(info->changed_labels, (void *) cypher_ast_label_get_name(set_label));
             }
         }
         if (cypher_astnode_type(item) == CYPHER_AST_REMOVE_PROPERTY) {
@@ -92,26 +95,26 @@ void set_changed_labels_and_props(const cypher_astnode_t *clause, QueryInfo *inf
             } else {
                 strcpy(prop->key, cypher_ast_prop_name_get_value(prop_name));
                 strcpy(prop->value, "");
-                add_last(info->props, prop);
+                add_last(info->changed_props, prop);
             }
         }
     }
 }
 
-void set_labels_and_props(const cypher_astnode_t *node, QueryInfo *info) 
+void set_labels_and_props(const cypher_astnode_t *node, QueryInfo *info) //LinkidList *label, 
 {
     unsigned int labels_count = cypher_ast_node_pattern_nlabels(node);
-    printf("labels count: %u\n", labels_count);
-
+    //printf("labels count: %u\n", labels_count);
+    printf("label count %ud\n", labels_count);
     if (labels_count > 0){
         info->labels = init_list();
-        printf("null status %d\n", info->labels == NULL);
+        //printf("null status %d\n", info->labels == NULL);
     }
     
     for (int i = 0; i < labels_count; ++i) {
         const cypher_astnode_t *label = cypher_ast_node_pattern_get_label(node, i);
         
-        printf("lable: %s\n", cypher_ast_label_get_name(label));
+        //printf("lable: %s\n", cypher_ast_label_get_name(label));
 
         add_last(info->labels, (void *) cypher_ast_label_get_name(label));
     }
@@ -158,7 +161,7 @@ QueryInfo *get_query_info(cypher_parse_result_t *result)
 
     cypher_astnode_type_t command = cypher_astnode_type(clause);
     
-    printf("test command1 %u\n", (uint8_t)command);
+    //printf("command1 %u\n", (uint8_t)command);
 
     if (command == CYPHER_AST_MATCH) {
         const cypher_astnode_t *clause1 = cypher_ast_query_get_clause(query, 1);
@@ -177,12 +180,14 @@ QueryInfo *get_query_info(cypher_parse_result_t *result)
         if (command == CYPHER_AST_DELETE) {
             query_info->command_type = DELETE;
         }
-
+ //printf("command2 %u\n", (uint8_t)command); 
          if (command == CYPHER_AST_RETURN) {
             query_info->command_type = MATCH;
         } else{
             set_changed_labels_and_props(clause1, query_info);
-        } 
+        }
+
+       // printf("command2 %u\n", (uint8_t)command); 
     }
 
     if (command == CYPHER_AST_CREATE) {
@@ -196,9 +201,9 @@ QueryInfo *get_query_info(cypher_parse_result_t *result)
     }
     const cypher_astnode_t *path = cypher_ast_pattern_get_path(pattern, 0);
     const cypher_astnode_t *node = cypher_ast_pattern_path_get_element(path, 0);
-    printf("berofe %d\n", query_info->labels == NULL);
-    set_labels_and_props(node, query_info);
-    printf("after %d\n", query_info->labels == NULL);
+    //printf("berofe %d\n", query_info->labels == NULL);
+    set_labels_and_props(node, query_info); // query_info->labels
+    //printf("after %d\n", query_info->labels == NULL);
     // if (cypher_ast_pattern_path_nelements(path) == 3) {
     //     query_info->has_relation = true;
     //     const cypher_astnode_t *relation = cypher_ast_pattern_path_get_element(path, 1);
@@ -224,10 +229,80 @@ QueryInfo *get_query_info(cypher_parse_result_t *result)
     return query_info;
 }
 
-QueryInfo *parse_request(char *request)
+void bind_info(Request *request, QueryInfo *info)
 {
-    printf("You entered: %s\n", request);
-    cypher_parse_result_t *result = cypher_parse(request, NULL, NULL, CYPHER_PARSE_ONLY_STATEMENTS);
+    printf("Input Info:\n");
+    
+    if (info->labels != NULL)
+    {
+        Node_L *node = info->labels->first;
+        printf(">>>Target Label info:\n");
+
+        do
+        {
+            
+            char *label = (char *) node->value;
+            g_ptr_array_add(request->node->labels, label);
+            printf(">>>>>> (%s)\n", label);
+
+            node = node->next;
+        } while (node != NULL);
+    }
+
+    if (info->props != NULL)
+    {
+        Node_L *node = info->props->first;
+        printf(">>>Target Props info:\n");
+
+        do
+        {
+            Property *prop = (Property*) malloc(sizeof(Property));
+            prop = node->value;
+            g_hash_table_insert(request->node->props, prop->key, prop->value);
+            printf(">>>>>> {key: %s, value: %s}\n", prop->key, prop->value);
+            
+            node = node->next;
+        } while (node != NULL);
+    }
+
+    if (info->changed_labels != NULL)
+    {
+        Node_L *node = info->changed_labels->first;
+        printf(">>>Labels to modify:\n");
+
+        do
+        {
+            char * label = (char *) node->value;
+            g_ptr_array_add(request->node_updates->labels, label);
+            printf(">>>>>> (%s)\n", label);
+
+            node = node->next;
+        } while (node != NULL);
+    }
+
+    if (info->changed_props != NULL)
+    {
+        Node_L *node = info->changed_props->first;
+        printf(">>>Props to modify:\n");
+
+        do
+        {
+            Property *prop = (Property*) malloc(sizeof(Property));
+            prop = node->value;
+            g_hash_table_insert(request->node_updates->props, prop->key, prop->value);
+            printf(">>>>>> {key: %s, value: %s}\n", prop->key, prop->value);
+
+            node = node->next;
+        } while (node != NULL);
+    }
+
+    request->command_type = info->command_type;
+}
+
+int parse_request(Request *request, char *input_command)
+{
+    printf("You entered: %s\n", input_command);
+    cypher_parse_result_t *result = cypher_parse(input_command, NULL, NULL, CYPHER_PARSE_ONLY_STATEMENTS);
 
     if (result == NULL)
     {
@@ -247,6 +322,11 @@ QueryInfo *parse_request(char *request)
     
     QueryInfo *info = get_query_info(result);
 
+    if (info == NULL)
+        return -1;
+
+    bind_info(request, info);
+    
     cypher_parse_result_free(result);
-    return info;
+    return 1;
 }

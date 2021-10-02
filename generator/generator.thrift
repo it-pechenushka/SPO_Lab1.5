@@ -33,5 +33,5 @@ struct Request {
 }
 
 service Test{
-   void ping(1: Request request, 2: Response response),
+  Response ping(1: Request request)
 }
