@@ -1,0 +1,13 @@
+{
+    "C_Cpp.errorSquiggles": "Disabled",
+    "files.associations": {
+        "generator_types.h": "c",
+        "node_list.h": "c",
+        "stdlib.h": "c",
+        "graph_struct.h": "c",
+        "stdio.h": "c",
+        "request_parser.h": "c",
+        "request_handler.h": "c",
+        "type_traits": "c"
+    }
+}
