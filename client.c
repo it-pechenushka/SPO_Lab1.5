@@ -11,7 +11,10 @@
 #include "parser/request_parser.h"
 
 void input_command(char *, size_t *len);
-void input_command(char *, size_t *len);
+void print_result();
+void print_props (gpointer key, gpointer value, gpointer user_data);
+void print_labels (gpointer value, gpointer user_data);
+void print_nodes (gpointer value, gpointer user_data);
 
 int main (void)
 {
@@ -62,14 +65,18 @@ int main (void)
   {
     Response *response = g_object_new(TYPE_RESPONSE, NULL);
     Request *request = g_object_new(TYPE_REQUEST, NULL);
-    //input_command(input, size);
+    input_command(input, &size);
     
-    int status = parse_request(request, "CREATE (n:Person)");
-    if (test_if_ping (client, &response, request, &error)) {
-      printf("Success");
-    } 
+    int status = parse_request(request, input);
+    if (status)
+    {
+      if (test_if_ping (client, &response, request, &error)) 
+          print_result(response); 
+    } else {
+      printf("Bad Request Build");
+    }
 
-    getchar();
+    g_object_unref(response);
   }
 
 
@@ -85,6 +92,37 @@ int main (void)
 
 void input_command(char *input, size_t *len)
 {
-    printf("Input:\n");
+    printf("[input]: ");
     getline(&input, len, stdin);
+}
+
+void print_result(Response *response)
+{
+    printf("==================BEGIN==================\n");
+    printf("Response: %s\n", response->text);
+    printf("Result: \n");
+    g_ptr_array_foreach(response->nodes, print_nodes, NULL);
+    printf("===================END===================\n");
+}
+
+void print_nodes(gpointer value, gpointer user_data)
+{
+    Node *node = (Node*) value;
+    printf(">>Node: \n");
+    printf(">>>>Labels: \n");
+    g_ptr_array_foreach(node->labels, print_labels, NULL);
+    printf("\n");
+    printf(">>>>Props: \n");
+    g_hash_table_foreach(node->props, print_props, NULL);
+    printf("\n");
+}
+
+void print_props (gpointer key, gpointer value, gpointer user_data)
+{
+    printf("{%s: %s}\n", (char*) key, (char*) value);
+}
+
+void print_labels (gpointer value, gpointer user_data)
+{
+    printf("(%s) ", (char*) value);
 }

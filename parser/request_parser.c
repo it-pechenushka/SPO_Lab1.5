@@ -231,19 +231,19 @@ QueryInfo *get_query_info(cypher_parse_result_t *result)
 
 void bind_info(Request *request, QueryInfo *info)
 {
-    printf("Input Info:\n");
+    //printf("Input Info:\n");
     
     if (info->labels != NULL)
     {
         Node_L *node = info->labels->first;
-        printf(">>>Target Label info:\n");
+        //printf(">>>Target Label info:\n");
 
         do
         {
             
             char *label = (char *) node->value;
             g_ptr_array_add(request->node->labels, label);
-            printf(">>>>>> (%s)\n", label);
+            //printf(">>>>>> (%s)\n", label);
 
             node = node->next;
         } while (node != NULL);
@@ -252,14 +252,14 @@ void bind_info(Request *request, QueryInfo *info)
     if (info->props != NULL)
     {
         Node_L *node = info->props->first;
-        printf(">>>Target Props info:\n");
+        //printf(">>>Target Props info:\n");
 
         do
         {
             Property *prop = (Property*) malloc(sizeof(Property));
             prop = node->value;
             g_hash_table_insert(request->node->props, prop->key, prop->value);
-            printf(">>>>>> {key: %s, value: %s}\n", prop->key, prop->value);
+            //printf(">>>>>> {key: %s, value: %s}\n", prop->key, prop->value);
             
             node = node->next;
         } while (node != NULL);
@@ -268,13 +268,13 @@ void bind_info(Request *request, QueryInfo *info)
     if (info->changed_labels != NULL)
     {
         Node_L *node = info->changed_labels->first;
-        printf(">>>Labels to modify:\n");
+        //printf(">>>Labels to modify:\n");
 
         do
         {
             char * label = (char *) node->value;
             g_ptr_array_add(request->node_updates->labels, label);
-            printf(">>>>>> (%s)\n", label);
+            //printf(">>>>>> (%s)\n", label);
 
             node = node->next;
         } while (node != NULL);
@@ -283,14 +283,14 @@ void bind_info(Request *request, QueryInfo *info)
     if (info->changed_props != NULL)
     {
         Node_L *node = info->changed_props->first;
-        printf(">>>Props to modify:\n");
+        //printf(">>>Props to modify:\n");
 
         do
         {
             Property *prop = (Property*) malloc(sizeof(Property));
             prop = node->value;
             g_hash_table_insert(request->node_updates->props, prop->key, prop->value);
-            printf(">>>>>> {key: %s, value: %s}\n", prop->key, prop->value);
+            //printf(">>>>>> {key: %s, value: %s}\n", prop->key, prop->value);
 
             node = node->next;
         } while (node != NULL);
@@ -301,7 +301,7 @@ void bind_info(Request *request, QueryInfo *info)
 
 int parse_request(Request *request, char *input_command)
 {
-    printf("You entered: %s\n", input_command);
+    //printf("You entered: %s\n", input_command);
     cypher_parse_result_t *result = cypher_parse(input_command, NULL, NULL, CYPHER_PARSE_ONLY_STATEMENTS);
 
     if (result == NULL)
@@ -311,13 +311,13 @@ int parse_request(Request *request, char *input_command)
     }
     
     
-    printf("Parsed %d AST nodes\n", cypher_parse_result_nnodes(result));
-    printf("Read %d statements\n", cypher_parse_result_ndirectives(result));
-    printf("Encountered %d errors\n", cypher_parse_result_nerrors(result));
+    //printf("Parsed %d AST nodes\n", cypher_parse_result_nnodes(result));
+    //printf("Read %d statements\n", cypher_parse_result_ndirectives(result));
+    //printf("Encountered %d errors\n", cypher_parse_result_nerrors(result));
 
     if (cypher_parse_result_nerrors(result) > 0) {
         cypher_parse_result_free(result);
-        return -EXIT_FAILURE;
+        return -1;
     }
     
     QueryInfo *info = get_query_info(result);

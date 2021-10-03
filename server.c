@@ -68,12 +68,12 @@ m_test_handler_ping (TestIf  *iface, Response ** response, const Request * reque
   
   THRIFT_UNUSED_VAR (iface);
   THRIFT_UNUSED_VAR (error);
+  //g_object_set(*response, "text", "hello")
+  printf("Recive request\n");
   build_data(node_list, request, *response);
-  printf("%s", (*response)->text);
-  
+    
   //g_hash_table_foreach(request->node->props, hash_table_foreach_action, NULL);
   //g_ptr_array_foreach(request->node->labels, list_foreach_action, NULL);
-  printf("recive\n");
   return TRUE;
 }
 ////////////////////////////////////////////////////////////
@@ -86,8 +86,6 @@ m_test_handler_init (MTestHandler *self)
 static void
 m_test_handler_class_init (MTestHandlerClass *klass)
 {
-  GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
-  
   TestHandlerClass *test_handler_class =
     TEST_HANDLER_CLASS (klass);
 

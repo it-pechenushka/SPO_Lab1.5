@@ -18,7 +18,7 @@
 //#define SIZE_LIST_LABELS_NODE 4
 #define SIZE_LABEL_STRING 20
 
-//sizeof(Node_Labels) = 36;
+//sizeof(_NodeLabel) = 28;
 typedef struct _NodeLabel
 {
     long next_pos;
@@ -36,6 +36,7 @@ typedef struct _NodeLabelInfo {
 
 #define PROPERTY_FIELD_SIZE 20
 
+//sizeof(_NodeProp) = 48;
 typedef struct _NodeProp
 {
     long next_pos;
@@ -51,9 +52,8 @@ typedef struct _NodePropsInfo {
     NodeProp *prop;
 } NodePropsInfo;
 
-//if next_desk == it self => no have next;
+//_NodeItem = 16
 typedef struct _NodeItem {
-    long next_pos;
     long labels_pos;
     long props_pos;
 } NodeItem;
@@ -94,7 +94,14 @@ typedef struct _NodeList{
 #define OFFSET_NODE sizeof(NodeItem)
 
 NodeList* init_store();
-NodeInfo* init_node();
+NodeInfo* init_node_info();
+NodeItem* init_node_item();
+NodeLabelInfo* init_label_info();
+NodeLabel* init_label();
+NodePropsInfo* init_props_info();
+NodeProp* init_prop();
+
+void display_nodes(NodeList *list);
 
 int restore_db();
 int restore_labels();
