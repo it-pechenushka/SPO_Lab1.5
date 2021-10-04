@@ -103,8 +103,11 @@ int restore_labels()
 
         while (label_pos != -1)
         {
+
             NodeLabelInfo *label_info = init_label_info();
             label_info->label = init_label();
+            label_info->pos = label_pos;
+
             fseek(file, label_pos, SEEK_SET);
             // printf("pos label: %lu\n", ftell(file));
             if(fread(label_info->label, OFFSET_LABEL, 1, file) < 1)
@@ -134,6 +137,8 @@ int restore_props()
         {
             NodePropsInfo *prop_info = init_props_info();
             prop_info->prop = init_prop();
+            prop_info->pos = prop_pos;
+            
             fseek(file, prop_pos, SEEK_SET);
             // printf("pos prop: %lu\n", ftell(file));
                 if(fread(prop_info->prop, OFFSET_PROP, 1, file) < 1)

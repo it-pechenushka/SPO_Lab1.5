@@ -70,8 +70,9 @@ m_test_handler_ping (TestIf  *iface, Response ** response, const Request * reque
   THRIFT_UNUSED_VAR (error);
   //g_object_set(*response, "text", "hello")
   printf("Recive request\n");
+  
   build_data(node_list, request, *response);
-    
+
   //g_hash_table_foreach(request->node->props, hash_table_foreach_action, NULL);
   //g_ptr_array_foreach(request->node->labels, list_foreach_action, NULL);
   return TRUE;

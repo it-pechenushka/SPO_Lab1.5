@@ -68,12 +68,12 @@ int main (void)
     input_command(input, &size);
     
     int status = parse_request(request, input);
-    if (status)
+    if (status > 0)
     {
       if (test_if_ping (client, &response, request, &error)) 
           print_result(response); 
     } else {
-      printf("Bad Request Build");
+      printf("Bad Request Build\n");
     }
 
     g_object_unref(response);
@@ -100,8 +100,15 @@ void print_result(Response *response)
 {
     printf("==================BEGIN==================\n");
     printf("Response: %s\n", response->text);
-    printf("Result: \n");
-    g_ptr_array_foreach(response->nodes, print_nodes, NULL);
+    printf("Result: ");
+
+    if (response->nodes == NULL)
+        printf("No Result\n");
+    else {
+      printf("\n");
+      g_ptr_array_foreach(response->nodes, print_nodes, NULL);
+    }
+    
     printf("===================END===================\n");
 }
 

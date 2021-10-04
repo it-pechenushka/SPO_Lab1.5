@@ -105,7 +105,6 @@ void set_labels_and_props(const cypher_astnode_t *node, QueryInfo *info) //Linki
 {
     unsigned int labels_count = cypher_ast_node_pattern_nlabels(node);
     //printf("labels count: %u\n", labels_count);
-    printf("label count %ud\n", labels_count);
     if (labels_count > 0){
         info->labels = init_list();
         //printf("null status %d\n", info->labels == NULL);
@@ -310,10 +309,9 @@ int parse_request(Request *request, char *input_command)
         return EXIT_FAILURE;
     }
     
-    
-    //printf("Parsed %d AST nodes\n", cypher_parse_result_nnodes(result));
-    //printf("Read %d statements\n", cypher_parse_result_ndirectives(result));
-    //printf("Encountered %d errors\n", cypher_parse_result_nerrors(result));
+    // printf("Parsed %d AST nodes\n", cypher_parse_result_nnodes(result));
+    // printf("Read %d statements\n", cypher_parse_result_ndirectives(result));
+    // printf("Encountered %d errors\n", cypher_parse_result_nerrors(result));
 
     if (cypher_parse_result_nerrors(result) > 0) {
         cypher_parse_result_free(result);
